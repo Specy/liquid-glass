@@ -1,7 +1,6 @@
 # @specy/liquid-glass
 
-An apple styled liquid glass effect for the web. 
-
+An apple styled liquid glass effect for the web. A pretty weird attempt at making liquid glass for the web.
 
 ## Installation
 
