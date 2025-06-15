@@ -28,7 +28,7 @@ const DEFAULT_GLASS_STYLE = {
   thickness: 64,
 } as const;
 
-const DEBOUNCE_DELAY = 100;
+const DEBOUNCE_DELAY = 16;
 const DEFAULT_PIXEL_RATIO_LIMIT = 2;
 const CAMERA_NEAR = 0.1;
 const CAMERA_FAR = 200000;

@@ -1,6 +1,6 @@
 {
   "name": "@specy/liquid-glass",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Three.js powered glass effect component with glass-like morphing animations",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

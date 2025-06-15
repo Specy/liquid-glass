@@ -11,6 +11,7 @@ const glassEffect = new LiquidGlass(document.body, {
 position: fixed;
 bottom: 0.5rem;
 width: fit-content;
+max-width: calc(100vw - 1rem);
 left: 0;
 right: 0;
 margin: 0 auto;
@@ -25,7 +26,7 @@ document.body.appendChild(glassEffect.element)
 
 const el = `
 <div>
-<h1 style='font-size: 2rem'>Liquid Glass Effect</h1>
+<h1 style='font-size: 1.8rem'>Liquid Glass</h1>
 <p>
 This is a demo for the Liquid Glass effect.
 </p>
