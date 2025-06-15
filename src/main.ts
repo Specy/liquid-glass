@@ -18,7 +18,10 @@ margin: 0 auto;
 padding: 0.8rem 3rem;
 overflow: hidden;
 `, {
-  radius: 16,
+
+  radius: 22,
+  depth: 36,
+  segments: 64,
   roughness: 0.2,
 })
 

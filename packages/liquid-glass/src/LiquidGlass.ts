@@ -24,6 +24,7 @@ const DEFAULT_GLASS_STYLE = {
   tint: null as number | null,
   roughness: 0.3,
   transmission: 1,
+  reflectivity: 0.9,
   ior: 2,
   thickness: 64,
 } as const;
@@ -31,7 +32,7 @@ const DEFAULT_GLASS_STYLE = {
 const DEBOUNCE_DELAY = 16;
 const DEFAULT_PIXEL_RATIO_LIMIT = 2;
 const CAMERA_NEAR = 0.1;
-const CAMERA_FAR = 200000;
+const CAMERA_FAR = 20000;
 const CAMERA_Z_POSITION = 512;
 
 const FLOATING_DIV_STYLES = `
@@ -61,6 +62,7 @@ export interface GlassStyle {
   tint?: number | null;
   roughness?: number;
   transmission?: number;
+  reflectivity?: number;
   ior?: number;
   thickness?: number;
 }
@@ -306,6 +308,7 @@ export class LiquidGlass {
       canvas: this.threeCanvas,
       alpha: true,
       antialias: true,
+
     });
 
     this.renderer.setSize(width, height);
@@ -354,9 +357,9 @@ export class LiquidGlass {
       transmission: this.glassStyle.transmission,
       thickness: this.glassStyle.thickness,
       ior: this.glassStyle.ior,
-      clearcoat: 0,
+      reflectivity: this.glassStyle.reflectivity,
+      dispersion: 1,
     });
-
     if (typeof this.glassStyle.tint === "number") {
       material.color.set(this.glassStyle.tint);
     }
