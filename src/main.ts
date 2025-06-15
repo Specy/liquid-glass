@@ -21,7 +21,7 @@ overflow: hidden;
 
   radius: 22,
   depth: 36,
-  segments: 64,
+  segments: 32,
   roughness: 0.2,
 })
 
