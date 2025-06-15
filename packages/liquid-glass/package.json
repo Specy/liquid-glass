@@ -1,0 +1,47 @@
+{
+  "name": "@specy/liquid-glass",
+  "version": "1.0.0",
+  "description": "A Three.js powered glass effect component with glass-like morphing animations",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "three.js",
+    "glass-effect",
+    "morphing",
+    "animation",
+    "webgl",
+    "ui-component",
+    "liquid-glass"
+  ],
+  "author": "Specy",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Specy/liquid-glass.git"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsup",
+    "build:watch": "tsup --watch"
+  },
+  "devDependencies": {
+    "@types/three": "^0.177.0",
+    "tsup": "^8.5.0",
+    "typescript": "~5.8.3",
+    "three": "^0.177.0",
+    "html2canvas-pro": "^1.5.11"
+  },
+  "dependencies": {}
+}

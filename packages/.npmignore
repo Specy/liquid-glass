@@ -1,0 +1,35 @@
+# Development files
+src/
+public/
+.vscode/
+node_modules/
+
+# Build tools
+vite.config.ts
+tsup.config.ts
+tsconfig.json
+
+# Version control
+.git/
+.gitignore
+
+# Demo files
+index.html
+src/style.css
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Cache
+.cache/
+.tmp/
+
+# OS files
+.DS_Store
+Thumbs.db
