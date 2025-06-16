@@ -1,5 +1,5 @@
-import html2canvas, { type Options } from 'html2canvas-pro'
-
+import html2canvaspro, { type Options } from 'html2canvas-pro'
+import html2canvas from 'html2canvas'
 import {
   WebGLRenderer,
   Scene,
@@ -100,12 +100,24 @@ export class LiquidGlass {
   private animationId: number | null = null;
   private isInitialized: boolean = false;
   private debounceTimeout: number | undefined;
+  private ignoreElementCallback: (element: Node) => boolean
+
+  static html2canvas = html2canvaspro as typeof html2canvaspro | typeof html2canvas;
+
+  static useHtml2CanvasPro(val: boolean) {
+    if (val) {
+      LiquidGlass.html2canvas = html2canvaspro;
+    } else {
+      LiquidGlass.html2canvas = html2canvas;
+    }
+  }
 
   constructor(
     targetElement: HTMLElement,
     screenshotOptions: Partial<Options> = {},
     customStyle: string = "",
     glassStyle: GlassStyle = {},
+    ignoreElementCallback: (element: Node) => boolean = () => false,
   ) {
     this.targetElement = targetElement;
     this.screenshotOptions = screenshotOptions;
@@ -116,6 +128,7 @@ export class LiquidGlass {
     this.floatingDiv = this.createFloatingDiv();
     this.mutationObserver = this.createMutationObserver();
     this.resizeObserver = this.createResizeObserver();
+    this.ignoreElementCallback = ignoreElementCallback;
 
     this.initialize();
   }
@@ -168,6 +181,20 @@ export class LiquidGlass {
     });
   }
 
+  private isIgnoredElement(element: Node): boolean {
+    if (element instanceof HTMLElement) {
+      return (
+        element.dataset.html2canvasIgnore === "true" ||
+        element.classList.contains("html2canvas-ignore") ||
+        element.classList.contains("html2canvas-container") ||
+        element.textContent === 'Hidden Text' ||
+        this.ignoreElementCallback(element)
+      );
+    }
+    return false;
+  }
+
+
   private shouldIgnoreMutation(mutations: MutationRecord[]): boolean {
     const first = mutations[0];
     const nodes = [
@@ -176,17 +203,17 @@ export class LiquidGlass {
       ...(first.attributeName ? [first.target] : []),
     ];
 
-    if (nodes.length === 1) {
-      const element = nodes[0] as HTMLElement;
-      if (element instanceof HTMLElement) {
-        return (
-          element.dataset.html2canvasIgnore === "true" ||
-          element.classList.contains("html2canvas-ignore") ||
-          element.classList.contains("html2canvas-container")
-        );
+    const hasIgnoredElement = nodes.some(element => {
+      let currentElement: Node | null = element;
+      while (currentElement) {
+        if (this.isIgnoredElement(currentElement)) {
+          return true;
+        }
+        currentElement = currentElement.parentNode;
       }
-    }
-    return false;
+    })
+
+    return hasIgnoredElement
   }
 
   private debouncedUpdate(): void {
@@ -372,6 +399,7 @@ export class LiquidGlass {
       height: this.targetElement.scrollHeight,
     };
   }
+
 
   private getScrollbarSizes(): ScrollbarSizes {
     if (this.targetElement === document.body) {
@@ -625,8 +653,6 @@ export class LiquidGlass {
     this.mutationObserver.observe(this.targetElement, {
       childList: true,
       subtree: true,
-      characterData: true,
-      attributes: true,
     });
 
     this.addEventListeners();
@@ -665,12 +691,14 @@ export async function takeElementScreenshot(element: HTMLElement, options: Parti
     const defaultOptions: Partial<Options> = {
       allowTaint: true,
       useCORS: true,
+      logging: false,
       scale: 1,
       ...options
     }
 
     // Capture the specified element
-    return await html2canvas(element, defaultOptions)
+    //@ts-ignore
+    return await LiquidGlass.html2canvas(element, defaultOptions)
 
   } catch (error) {
     console.error('Error taking screenshot:', error)

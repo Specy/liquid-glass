@@ -40,5 +40,3 @@ const element = document.createElement('div')
 element.innerHTML = el
 
 glassEffect.content.appendChild(element)
-
-console.log(glassEffect.element)

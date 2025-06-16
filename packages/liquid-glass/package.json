@@ -1,15 +1,15 @@
 {
   "name": "@specy/liquid-glass",
-  "version": "1.0.2",
+  "version": "1.0.7",
   "description": "A Three.js powered glass effect component with glass-like morphing animations",
   "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     }
   },
   "files": [
@@ -38,10 +38,12 @@
   },
   "devDependencies": {
     "@types/three": "^0.177.0",
+    "html2canvas-pro": "^1.5.11",
+    "three": "^0.177.0",
     "tsup": "^8.5.0",
     "typescript": "~5.8.3",
-    "three": "^0.177.0",
-    "html2canvas-pro": "^1.5.11"
+    "html2canvas": "^1.4.1"
   },
-  "dependencies": {}
+  "dependencies": {
+  }
 }
