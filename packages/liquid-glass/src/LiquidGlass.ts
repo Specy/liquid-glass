@@ -40,8 +40,8 @@ const FLOATING_DIV_STYLES = `
 `;
 
 const CONTENT_ELEMENT_STYLES = `
-  z-index: 10;
   position: relative;
+  z-index: 1;
 `;
 
 const THREE_CANVAS_STYLES = `
@@ -82,7 +82,7 @@ export class LiquidGlass {
   private readonly floatingDiv: HTMLDivElement;
   private readonly contentElement: HTMLDivElement;
   private readonly resizeObserver: ResizeObserver;
-  private readonly customStyle: string;
+  private customStyle: string;
   private glassStyle: Required<GlassStyle>;
   private readonly paintCache: PaintLayerCache;
   private paintCacheCallback: ((canvas: HTMLCanvasElement) => void) | null = null;
@@ -156,6 +156,16 @@ export class LiquidGlass {
     div.appendChild(this.contentElement);
     return div;
   }
+
+  setStyle(style: string): void {
+    this.customStyle = style;
+    this.floatingDiv.style.cssText = `
+      ${FLOATING_DIV_STYLES}
+      border-radius: calc(${this.glassStyle.radius}px * 2);
+      ${this.customStyle}
+    `;
+  }
+
 
   private createResizeObserver(): ResizeObserver {
     return new ResizeObserver(() => {
@@ -475,6 +485,8 @@ export class LiquidGlass {
       material.transmission = this.glassStyle.transmission;
       material.thickness = this.glassStyle.thickness;
       material.ior = this.glassStyle.ior;
+      material.reflectivity = this.glassStyle.reflectivity;
+      material.dispersion = this.glassStyle.dispersion;
 
       if (typeof this.glassStyle.tint === "number") {
         material.color.set(this.glassStyle.tint);
@@ -492,7 +504,7 @@ export class LiquidGlass {
 
     if (this.glassMesh && geometryChanged) {
       const { width, height } = this.getCurrentDimensions();
-
+      this.setStyle(this.customStyle);
       this.glassMesh.geometry.dispose();
       this.glassMesh.geometry = this.createPillGeometry(width, height);
     }

@@ -1,5 +1,9 @@
 # @specy/liquid-glass-react
 
+React wrapper for [@specy/liquid-glass](https://github.com/Specy/liquid-glass) - A Three.js powered glass effect component that recreates apple's liquid glass .
+
+## Installation
+
 ```bash
 npm install @specy/liquid-glass-react
 ```

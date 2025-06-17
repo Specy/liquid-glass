@@ -217,8 +217,11 @@ export class PaintLayerCache {
 
       console.log('took screenshot of', element);
       // Capture the specified element
+      return await PaintLayerCache.html2canvas(
+        element.tagName === 'BODY' ? (document.body.parentElement ?? element) : element,
       //@ts-ignore
-      return await PaintLayerCache.html2canvas(element, defaultOptions);
+        defaultOptions
+      );
 
     } catch (error) {
       console.error('Error taking screenshot:', error);
