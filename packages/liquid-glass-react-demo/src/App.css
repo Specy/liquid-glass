@@ -2,7 +2,6 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
   font-family: 'Rubik', sans-serif;
   text-align: center;
 }
@@ -110,8 +109,6 @@
 @media (max-width: 768px) {
   .app-container {
     padding: 10px;
-  }
-  #root{
     padding: 0.5rem;
   }
   .button-group {
