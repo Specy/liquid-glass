@@ -1,5 +1,3 @@
-import html2canvaspro, { type Options } from 'html2canvas-pro'
-import html2canvas from 'html2canvas'
 import {
   WebGLRenderer,
   Scene,
@@ -15,6 +13,7 @@ import {
 } from "three";
 
 import { PillGeometry } from "./PillGeometry";
+import { PaintLayerCache } from "./PaintLayerCache";
 
 // Constants
 const DEFAULT_GLASS_STYLE = {
@@ -29,7 +28,6 @@ const DEFAULT_GLASS_STYLE = {
   thickness: 64,
 } as const;
 
-const DEBOUNCE_DELAY = 16;
 const DEFAULT_PIXEL_RATIO_LIMIT = 2;
 const CAMERA_NEAR = 0.1;
 const CAMERA_FAR = 20000;
@@ -81,13 +79,13 @@ export class LiquidGlass {
   private readonly targetElement: HTMLElement;
   private readonly floatingDiv: HTMLDivElement;
   private readonly contentElement: HTMLDivElement;
-  private readonly mutationObserver: MutationObserver;
   private readonly resizeObserver: ResizeObserver;
-  private screenshotOptions: Partial<Options>;
   private readonly customStyle: string;
   private glassStyle: Required<GlassStyle>;
+  private readonly paintCache: PaintLayerCache;
+  private paintCacheCallback: ((canvas: HTMLCanvasElement) => void) | null = null;
 
-  // js components
+  // ThreeJS components
   private threeCanvas: HTMLCanvasElement | null = null;
   private renderer: WebGLRenderer | null = null;
   private scene: Scene | null = null;
@@ -95,44 +93,27 @@ export class LiquidGlass {
   private glassMesh: Mesh | null = null;
   private backgroundMesh: Mesh | null = null;
   private backgroundTexture: Texture | null = null;
-
+  
   // State management
   private animationId: number | null = null;
   private isInitialized: boolean = false;
-  private debounceTimeout: number | undefined;
-  private ignoreElementCallback: (element: Node) => boolean
-
-  static html2canvas = html2canvaspro as typeof html2canvaspro | typeof html2canvas;
-
-  static useHtml2CanvasPro(val: boolean) {
-    if (val) {
-      LiquidGlass.html2canvas = html2canvaspro;
-    } else {
-      LiquidGlass.html2canvas = html2canvas;
-    }
-  }
 
   constructor(
     targetElement: HTMLElement,
-    screenshotOptions: Partial<Options> = {},
     customStyle: string = "",
     glassStyle: GlassStyle = {},
-    ignoreElementCallback: (element: Node) => boolean = () => false,
   ) {
     this.targetElement = targetElement;
-    this.screenshotOptions = screenshotOptions;
     this.customStyle = customStyle;
+    this.paintCache = PaintLayerCache.getInstance();
 
     this.glassStyle = this.createGlassStyle(glassStyle);
     this.contentElement = this.createContentElement();
     this.floatingDiv = this.createFloatingDiv();
-    this.mutationObserver = this.createMutationObserver();
     this.resizeObserver = this.createResizeObserver();
-    this.ignoreElementCallback = ignoreElementCallback;
 
     this.initialize();
   }
-
   // Public getters
   get element(): HTMLElement {
     return this.floatingDiv;
@@ -158,6 +139,7 @@ export class LiquidGlass {
     contentElement.style.cssText = CONTENT_ELEMENT_STYLES;
     return contentElement;
   }
+  
   private createFloatingDiv(): HTMLDivElement {
     const div = document.createElement("div");
     div.setAttribute("data-html2canvas-ignore", "true");
@@ -172,56 +154,7 @@ export class LiquidGlass {
     div.appendChild(this.contentElement);
     return div;
   }
-  private createMutationObserver(): MutationObserver {
-    return new MutationObserver((mutations) => {
-      if (this.shouldIgnoreMutation(mutations)) {
-        return;
-      }
-      this.debouncedUpdate();
-    });
-  }
 
-  private isIgnoredElement(element: Node): boolean {
-    if (element instanceof HTMLElement) {
-      return (
-        element.dataset.html2canvasIgnore === "true" ||
-        element.classList.contains("html2canvas-ignore") ||
-        element.classList.contains("html2canvas-container") ||
-        element.textContent === 'Hidden Text' ||
-        this.ignoreElementCallback(element)
-      );
-    }
-    return false;
-  }
-
-
-  private shouldIgnoreMutation(mutations: MutationRecord[]): boolean {
-    const first = mutations[0];
-    const nodes = [
-      ...first.addedNodes,
-      ...first.removedNodes,
-      ...(first.attributeName ? [first.target] : []),
-    ];
-
-    const hasIgnoredElement = nodes.some(element => {
-      let currentElement: Node | null = element;
-      while (currentElement) {
-        if (this.isIgnoredElement(currentElement)) {
-          return true;
-        }
-        currentElement = currentElement.parentNode;
-      }
-    })
-
-    return hasIgnoredElement
-  }
-
-  private debouncedUpdate(): void {
-    clearTimeout(this.debounceTimeout);
-    this.debounceTimeout = setTimeout(() => {
-      this.updateScreenshot();
-    }, DEBOUNCE_DELAY);
-  }
   private createResizeObserver(): ResizeObserver {
     return new ResizeObserver(() => {
       this.handleResize();
@@ -284,21 +217,34 @@ export class LiquidGlass {
       this.glassStyle.radius,
     );
   }
+
   private async initialize(): Promise<void> {
     try {
       await this.initializeThreeJS();
-      await this.updateScreenshot();
-      this.startObserving();
+      await this.registerWithPaintCache();
       this.resizeObserver.observe(this.floatingDiv);
       this.startAnimation();
       this.handleResize();
+      this.addEventListeners();
 
       this.isInitialized = true;
-      console.log("FloatingScreenshot initialized successfully");
+      console.log("LiquidGlass initialized successfully");
     } catch (error) {
-      console.error("Failed to initialize FloatingScreenshot:", error);
+      console.error("Failed to initialize LiquidGlass:", error);
       throw error;
     }
+  }
+  private async registerWithPaintCache(): Promise<void> {
+    this.paintCacheCallback = (canvas: HTMLCanvasElement) => {
+      if (this.isInitialized) {
+        this.updateBackgroundTexture(canvas);
+      }
+    };
+
+    await this.paintCache.register(
+      this.targetElement,
+      this.paintCacheCallback
+    );
   }
 
   private startAnimation(): void {
@@ -310,6 +256,7 @@ export class LiquidGlass {
     };
     animate();
   }
+
   private async initializeThreeJS(): Promise<void> {
     const { width, height } = this.getCurrentDimensions();
 
@@ -318,7 +265,6 @@ export class LiquidGlass {
     this.setupCamera(width, height);
     this.setupScene();
 
-    await this.initializeBackgroundMesh();
     this.createGlassMesh(width, height);
   }
 
@@ -335,7 +281,6 @@ export class LiquidGlass {
       canvas: this.threeCanvas,
       alpha: true,
       antialias: true,
-
     });
 
     this.renderer.setSize(width, height);
@@ -359,13 +304,6 @@ export class LiquidGlass {
 
   private setupScene(): void {
     this.scene = new Scene();
-  }
-  private async initializeBackgroundMesh(): Promise<void> {
-    const canvas = await takeElementScreenshot(
-      document.body,
-      this.screenshotOptions,
-    );
-    this.updateBackgroundTexture(canvas);
   }
 
   private createGlassMesh(width: number, height: number): void {
@@ -393,13 +331,13 @@ export class LiquidGlass {
 
     return material;
   }
+
   private getTargetSize(): Dimensions {
     return {
       width: this.targetElement.scrollWidth,
       height: this.targetElement.scrollHeight,
     };
   }
-
 
   private getScrollbarSizes(): ScrollbarSizes {
     if (this.targetElement === document.body) {
@@ -413,6 +351,7 @@ export class LiquidGlass {
       y: this.targetElement.offsetHeight - this.targetElement.clientHeight,
     };
   }
+
   private updateBackgroundTexture(canvas: HTMLCanvasElement): void {
     this.disposeBackgroundTexture();
 
@@ -461,6 +400,7 @@ export class LiquidGlass {
     this.backgroundMesh.geometry.dispose();
     this.backgroundMesh.geometry = new PlaneGeometry(sizes.width, sizes.height);
   }
+
   private updateBackgroundPosition(): void {
     if (
       !this.backgroundMesh ||
@@ -499,28 +439,10 @@ export class LiquidGlass {
       -this.glassStyle.depth / 2,
     );
   }
+
   // Public methods
   public async updateScreenshot(): Promise<void> {
-    try {
-      const canvas = await takeElementScreenshot(
-        document.body,
-        this.screenshotOptions,
-      );
-
-      if (this.isInitialized) {
-        this.updateBackgroundTexture(canvas);
-      }
-
-      console.log("Screenshot updated for glass effect");
-    } catch (error) {
-      console.error("Failed to update screenshot:", error);
-      throw error;
-    }
-  }
-
-  public updateOptions(newOptions: Partial<Options>): void {
-    this.screenshotOptions = { ...this.screenshotOptions, ...newOptions };
-    this.updateScreenshot();
+    await this.paintCache.forceUpdate(this.targetElement);
   }
 
   public async forceUpdate(): Promise<void> {
@@ -575,15 +497,17 @@ export class LiquidGlass {
       this.glassMesh.geometry = this.createPillGeometry(width, height);
     }
   }
+
   public destroy(): void {
     this.stopAnimation();
     this.cleanupThreeJS();
-    this.stopObserving();
-    this.clearTimeouts();
+    this.unregisterFromPaintCache();
+    this.removeEventListeners();
+    this.resizeObserver.disconnect();
     this.removeDOMElements();
 
     this.isInitialized = false;
-    console.log("FloatingScreenshot destroyed");
+    console.log("LiquidGlass destroyed");
   }
 
   private stopAnimation(): void {
@@ -636,28 +560,19 @@ export class LiquidGlass {
     this.threeCanvas = null;
   }
 
-  private clearTimeouts(): void {
-    if (this.debounceTimeout) {
-      clearTimeout(this.debounceTimeout);
-    }
-  }
-
   private removeDOMElements(): void {
     if (this.floatingDiv.parentNode) {
       this.floatingDiv.parentNode.removeChild(this.floatingDiv);
     }
   }
-
-  // Event handling
-  private startObserving(): void {
-    this.mutationObserver.observe(this.targetElement, {
-      childList: true,
-      subtree: true,
-    });
-
-    this.addEventListeners();
+  private unregisterFromPaintCache(): void {
+    if (this.paintCacheCallback) {
+      this.paintCache.unregister(this.targetElement, this.paintCacheCallback);
+      this.paintCacheCallback = null;
+    }
   }
 
+  // Event handling
   private addEventListeners(): void {
     window.addEventListener("scroll", this.handleScroll, { passive: true });
     window.addEventListener("resize", this.handleWindowResize, {
@@ -673,35 +588,8 @@ export class LiquidGlass {
     this.handleResize();
   };
 
-  private stopObserving(): void {
-    this.mutationObserver.disconnect();
-    this.resizeObserver.disconnect();
-    this.removeEventListeners();
-  }
-
   private removeEventListeners(): void {
     window.removeEventListener("scroll", this.handleScroll);
     window.removeEventListener("resize", this.handleWindowResize);
-  }
-}
-
-export async function takeElementScreenshot(element: HTMLElement, options: Partial<Options> = {}) {
-  try {
-    // Default options for best quality screenshot
-    const defaultOptions: Partial<Options> = {
-      allowTaint: true,
-      useCORS: true,
-      logging: false,
-      scale: 1,
-      ...options
-    }
-
-    // Capture the specified element
-    //@ts-ignore
-    return await LiquidGlass.html2canvas(element, defaultOptions)
-
-  } catch (error) {
-    console.error('Error taking screenshot:', error)
-    throw error
   }
 }

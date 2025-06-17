@@ -29,18 +29,53 @@ export class PillGeometry extends ExtrudeGeometry {
         
         const shape = new Shape();
         const x = -shapeWidth / 2;
-        const y = -shapeHeight / 2;
-
-        // Create rounded rectangle shape
+        const y = -shapeHeight / 2;        // Create rounded rectangle shape with proper segment subdivision
+        // Start from bottom-left corner and go clockwise
         shape.moveTo(x + clampedRadius, y);
+        
+        // Bottom edge
         shape.lineTo(x + shapeWidth - clampedRadius, y);
-        shape.quadraticCurveTo(x + shapeWidth, y, x + shapeWidth, y + clampedRadius);
+        
+        // Bottom-right corner (90-degree arc)
+        PillGeometry.addRoundedCorner(shape, 
+            x + shapeWidth - clampedRadius, y + clampedRadius, // center
+            clampedRadius, 
+            -Math.PI / 2, 0, // from -90° to 0°
+            segments
+        );
+        
+        // Right edge
         shape.lineTo(x + shapeWidth, y + shapeHeight - clampedRadius);
-        shape.quadraticCurveTo(x + shapeWidth, y + shapeHeight, x + shapeWidth - clampedRadius, y + shapeHeight);
+        
+        // Top-right corner (90-degree arc)
+        PillGeometry.addRoundedCorner(shape,
+            x + shapeWidth - clampedRadius, y + shapeHeight - clampedRadius, // center
+            clampedRadius,
+            0, Math.PI / 2, // from 0° to 90°
+            segments
+        );
+        
+        // Top edge
         shape.lineTo(x + clampedRadius, y + shapeHeight);
-        shape.quadraticCurveTo(x, y + shapeHeight, x, y + shapeHeight - clampedRadius);
+        
+        // Top-left corner (90-degree arc)
+        PillGeometry.addRoundedCorner(shape,
+            x + clampedRadius, y + shapeHeight - clampedRadius, // center
+            clampedRadius,
+            Math.PI / 2, Math.PI, // from 90° to 180°
+            segments
+        );
+        
+        // Left edge
         shape.lineTo(x, y + clampedRadius);
-        shape.quadraticCurveTo(x, y, x + clampedRadius, y);
+        
+        // Bottom-left corner (90-degree arc)
+        PillGeometry.addRoundedCorner(shape,
+            x + clampedRadius, y + clampedRadius, // center
+            clampedRadius,
+            Math.PI, 3 * Math.PI / 2, // from 180° to 270°
+            segments
+        );
 
         // Define the extrusion settings
         const extrudeSettings: ExtrudeGeometryOptions = {
@@ -60,5 +95,36 @@ export class PillGeometry extends ExtrudeGeometry {
         
         // Instead, manually translate to ensure proper bounds
         this.center();
+    }
+
+    /**
+     * Helper method to add a smooth rounded corner to a shape
+     * @param shape - The Three.js Shape to add the corner to
+     * @param centerX - X coordinate of the corner's center
+     * @param centerY - Y coordinate of the corner's center
+     * @param radius - Radius of the corner
+     * @param startAngle - Starting angle in radians
+     * @param endAngle - Ending angle in radians
+     * @param segments - Number of segments to subdivide the arc
+     */
+    private static addRoundedCorner(
+        shape: Shape,
+        centerX: number,
+        centerY: number,
+        radius: number,
+        startAngle: number,
+        endAngle: number,
+        segments: number
+    ): void {
+        // Ensure we have at least 2 segments for a smooth corner
+        const cornerSegments = Math.max(2, Math.floor(segments / 4));
+        const angleStep = (endAngle - startAngle) / cornerSegments;
+        
+        for (let i = 1; i <= cornerSegments; i++) {
+            const angle = startAngle + (angleStep * i);
+            const x = centerX + Math.cos(angle) * radius;
+            const y = centerY + Math.sin(angle) * radius;
+            shape.lineTo(x, y);
+        }
     }
 }

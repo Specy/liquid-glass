@@ -1,42 +1,80 @@
 import './style.css'
-import { LiquidGlass } from '../packages/liquid-glass/src/LiquidGlass'
+import { LiquidGlass, PaintLayerCache } from '../packages/liquid-glass/src/index'
 
-const glassEffect = new LiquidGlass(document.body, {
-  allowTaint: true,
-  useCORS: true,
-  scale: 1, // Match device pixel ratio for better quality
-  logging: false,
-  backgroundColor: null, // Preserve original background colors
-}, `
+// Configure the paint cache for better perf  ormance
+PaintLayerCache.useHtml2CanvasPro(true)
+
+const row = document.createElement('div')
+row.style.cssText = `
+display: flex;
+align-items: center;
+justify-content: space-between;
 position: fixed;
 bottom: 0.5rem;
 width: fit-content;
 max-width: calc(100vw - 1rem);
-left: 0;
-right: 0;
 margin: 0 auto;
-padding: 0.8rem 3rem;
-overflow: hidden;
-`, {
+left: 0.5rem;
+gap: 1rem;
+right: 0.5rem;
+`
 
-  radius: 22,
-  depth: 36,
-  segments: 32,
-  roughness: 0.2,
-})
+document.body.appendChild(row)
 
-document.body.appendChild(glassEffect.element)
+// Left glass element (existing one)
+const glassEffect1 = new LiquidGlass(
+  document.body,
+  `
+  padding: 0.75rem 3rem;
+  overflow: hidden;
+  `,
+  {
+    radius: 22,
+    depth: 24,
+    segments: 128,
+    roughness: 0.2,
+  }
+)
 
 const el = `
-<div>
-<h1 style='font-size: 1.8rem'>Liquid Glass</h1>
-<p>
-This is a demo for the Liquid Glass effect.
-</p>
-</div>
+<a href="https://github.com/Specy/liquid-glass">
+Star it on Github!
+</a>
 `
 
 const element = document.createElement('div')
 element.innerHTML = el
+glassEffect1.content.appendChild(element)
 
-glassEffect.content.appendChild(element)
+// Right glass element (small circular one)
+const glassEffect2 = new LiquidGlass(
+  document.body,
+  `
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  `,
+  {
+    radius: 30,
+    depth: 24,
+    segments: 128,
+    roughness: 0.1,
+    transmission: 0.9,
+  }
+)
+
+// Add icon/content to the circular glass element
+const circleContent = document.createElement('div')
+circleContent.innerHTML = '🖤'
+circleContent.style.cssText = `
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+`
+glassEffect2.content.appendChild(circleContent)
+
+// Add both glass elements to the row
+row.appendChild(glassEffect1.element)
+row.appendChild(glassEffect2.element)
