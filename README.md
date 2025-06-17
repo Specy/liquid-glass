@@ -1,5 +1,7 @@
 # @specy/liquid-glass-react
 
+![liquid glass react](https://raw.githubusercontent.com/Specy/liquid-glass/public/liquid-glass.png)
+
 ```bash
 npm install @specy/liquid-glass-react
 ```
