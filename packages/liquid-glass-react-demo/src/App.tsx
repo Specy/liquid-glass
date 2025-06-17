@@ -141,14 +141,14 @@ function App() {
                   onClick={resetToDefaults}
                   className="btn btn-primary"
                 >
-                  Reset to Defaults
+                  Reset
                 </button>
 
                 <button
                   onClick={cycleBackgroundImage}
                   className="btn btn-success"
                 >
-                  Change Background ({currentImageIndex + 1}/{images.length})
+                  Background ({currentImageIndex + 1}/{images.length})
                 </button>
               </div>
 
