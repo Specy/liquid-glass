@@ -31,8 +31,6 @@ const glassEffect1 = new LiquidGlass(
   {
     radius: 22,
     depth: 24,
-    segments: 128,
-    roughness: 0.2,
   }
 )
 
@@ -59,9 +57,6 @@ const glassEffect2 = new LiquidGlass(
   {
     radius: 30,
     depth: 24,
-    segments: 128,
-    roughness: 0.1,
-    transmission: 0.9,
   }
 )
 

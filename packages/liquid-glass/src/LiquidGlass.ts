@@ -17,15 +17,16 @@ import { PaintLayerCache } from "./PaintLayerCache";
 
 // Constants
 const DEFAULT_GLASS_STYLE = {
-  depth: 32,
-  segments: 32,
+  depth: 24,
+  segments: 86,
   radius: 16,
   tint: null as number | null,
   roughness: 0.3,
   transmission: 1,
   reflectivity: 0.9,
   ior: 2,
-  thickness: 64,
+  thickness: 32,
+  dispersion: 10,
 } as const;
 
 const DEFAULT_PIXEL_RATIO_LIMIT = 2;
@@ -62,6 +63,7 @@ export interface GlassStyle {
   transmission?: number;
   reflectivity?: number;
   ior?: number;
+  dispersion?: number;
   thickness?: number;
 }
 
@@ -323,7 +325,7 @@ export class LiquidGlass {
       thickness: this.glassStyle.thickness,
       ior: this.glassStyle.ior,
       reflectivity: this.glassStyle.reflectivity,
-      dispersion: 1,
+      dispersion: this.glassStyle.dispersion
     });
     if (typeof this.glassStyle.tint === "number") {
       material.color.set(this.glassStyle.tint);
