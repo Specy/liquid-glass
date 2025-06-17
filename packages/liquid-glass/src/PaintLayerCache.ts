@@ -9,6 +9,7 @@ interface ScreenshotCache {
   callbacks: Map<(canvas: HTMLCanvasElement) => void, (element: Node) => boolean>;
   mutationObserver?: MutationObserver;
   debounceTimeout?: number;
+  pendingUpdate?: Promise<void>;
 }
 
 export class PaintLayerCache {
@@ -55,11 +56,15 @@ export class PaintLayerCache {
     // Set up mutation observer if this is the first callback for this target
     if (cache.callbacks.size === 1) {
       this.setupMutationObserver(targetElement);
-    }
-
-    // If cache doesn't have a valid canvas yet, create initial screenshot
+    }    // If cache doesn't have a valid canvas yet, create initial screenshot
     if (!cache.canvas.width || !cache.canvas.height || cache.lastUpdate === 0) {
-      await this.updateScreenshot(targetElement, screenshotOptions);
+      // Wait for existing update if one is pending
+      if (cache.pendingUpdate) {
+        await cache.pendingUpdate;
+        callback(cache.canvas);
+      } else {
+        await this.updateScreenshot(targetElement, screenshotOptions);
+      }
     } else {
       // Use existing cached screenshot
       callback(cache.canvas);
@@ -157,8 +162,27 @@ export class PaintLayerCache {
       this.updateScreenshot(targetElement);
     }, DEBOUNCE_DELAY);
   }
-
   private async updateScreenshot(targetElement: HTMLElement, screenshotOptions: Partial<Options> = {}): Promise<void> {
+    const cache = PaintLayerCache.screenshotCache.get(targetElement);
+    if (!cache) return;
+
+    // If update is already pending, return the existing promise
+    if (cache.pendingUpdate) {
+      return cache.pendingUpdate;
+    }
+
+    // Create and store the update promise
+    cache.pendingUpdate = this.performScreenshotUpdate(targetElement, screenshotOptions);
+    
+    try {
+      await cache.pendingUpdate;
+    } finally {
+      // Clear the pending promise when done
+      cache.pendingUpdate = undefined;
+    }
+  }
+
+  private async performScreenshotUpdate(targetElement: HTMLElement, screenshotOptions: Partial<Options> = {}): Promise<void> {
     const cache = PaintLayerCache.screenshotCache.get(targetElement);
     if (!cache) return;
 
@@ -172,8 +196,8 @@ export class PaintLayerCache {
       for (const [callback] of cache.callbacks) {
         callback(canvas);
       }
-
       console.log("Screenshot updated for target element");
+
     } catch (error) {
       console.error("Failed to update screenshot:", error);
       throw error;
@@ -191,6 +215,7 @@ export class PaintLayerCache {
         ...options
       };
 
+      console.log('took screenshot of', element);
       // Capture the specified element
       //@ts-ignore
       return await PaintLayerCache.html2canvas(element, defaultOptions);

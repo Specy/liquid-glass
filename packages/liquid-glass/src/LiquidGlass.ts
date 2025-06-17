@@ -95,7 +95,7 @@ export class LiquidGlass {
   private glassMesh: Mesh | null = null;
   private backgroundMesh: Mesh | null = null;
   private backgroundTexture: Texture | null = null;
-  
+
   // State management
   private animationId: number | null = null;
   private isInitialized: boolean = false;
@@ -141,7 +141,7 @@ export class LiquidGlass {
     contentElement.style.cssText = CONTENT_ELEMENT_STYLES;
     return contentElement;
   }
-  
+
   private createFloatingDiv(): HTMLDivElement {
     const div = document.createElement("div");
     div.setAttribute("data-html2canvas-ignore", "true");
@@ -238,9 +238,7 @@ export class LiquidGlass {
   }
   private async registerWithPaintCache(): Promise<void> {
     this.paintCacheCallback = (canvas: HTMLCanvasElement) => {
-      if (this.isInitialized) {
-        this.updateBackgroundTexture(canvas);
-      }
+      this.updateBackgroundTexture(canvas);
     };
 
     await this.paintCache.register(
