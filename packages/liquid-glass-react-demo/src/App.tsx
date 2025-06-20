@@ -61,6 +61,8 @@ function Slider({ label, value, min, max, step, onChange, description }: SliderP
 function App() {
   // Background image state
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // eslint-disable-next-line 
   const [loading, setLoading] = useState(true);
   // Glass style state
   const [segments, setSegments] = useState<number>(DEFAULT_GLASS_STYLE.segments);
