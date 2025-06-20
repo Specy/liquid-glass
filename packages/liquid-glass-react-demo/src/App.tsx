@@ -184,7 +184,6 @@ function App() {
                 onChange={setRadius}
                 description="Border radius and depth of the glass shape"
               />
-
               <Slider
                 label="Roughness"
                 value={roughness}
@@ -194,8 +193,6 @@ function App() {
                 onChange={setRoughness}
                 description="Surface roughness (0 = mirror-like, 1 = completely rough)"
               />
-
-
               <Slider
                 label="Thickness"
                 value={thickness}
@@ -205,7 +202,15 @@ function App() {
                 onChange={setThickness}
                 description="Physical thickness of the glass material"
               />
-
+              <Slider
+                label="Chromatic abberation"
+                value={dispersion}
+                min={0}
+                max={10}
+                step={0.1}
+                onChange={setDispersion}
+                description="Chromatic aberration (Also called dispersion, rainbow effect like a prism)"
+              />
               <Slider
                 label="Reflectivity"
                 value={reflectivity}
@@ -217,7 +222,7 @@ function App() {
               />
 
               {/*
-      <Slider
+                        <Slider
                 label="IOR (Index of Refraction)"
                 value={ior}
                 min={1}
@@ -235,18 +240,8 @@ function App() {
                 onChange={setTransmission}
                 description="How much light passes through the glass (0 = opaque, 1 = fully transparent)"
               />
-                     <Slider
-                label="Dispersion"
-                value={dispersion}
-                min={0}
-                max={10}
-                step={0.1}
-                onChange={setDispersion}
-                description="Chromatic dispersion (rainbow effect like a prism)"
-              />
+       
 */}
-
-
 
 
 
@@ -269,6 +264,9 @@ const glassStyle = {
   segments: ${segments},
   radius: ${radius},
   tint: ${useTint ? `0x${tint?.toString(16).padStart(6, '0')}` : 'null'},
+  reflectivity: ${reflectivity},
+  thickness: ${thickness},
+  dispersion: ${dispersion},
   roughness: ${roughness},
 }
 

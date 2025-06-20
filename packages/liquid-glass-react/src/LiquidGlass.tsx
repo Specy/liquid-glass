@@ -153,8 +153,8 @@ export const LiquidGlass = forwardRef<LiquidGlassRef, LiquidGlassProps>(
         // Update glass style when it changes
         useEffect(() => {
             glassStyleRef.current = glassStyle
-            if (liquidGlassRef.current) {
-                liquidGlassRef.current.updateGlassStyle(glassStyle ?? {})
+            if (liquidGlassRef.current && glassStyle) {
+                liquidGlassRef.current.updateGlassStyle(glassStyle)
             }
         }, [glassStyle])        // Render children into the LiquidGlass content element via portal
 
