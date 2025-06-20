@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -61,7 +62,7 @@
   font-weight: 500;
 }
 
-.code-snippet{
+.code-snippet {
   flex: 1;
   border-radius: 0.5rem;
   padding: 0.5rem;
@@ -72,12 +73,25 @@
   border: solid 1px rgb(0, 0, 0);
 }
 
+.btn {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+
+}
+
 .btn-primary {
+
+  text-align: center;
   background-color: #092036;
   color: white;
 }
 
 .btn-success {
+
+  text-align: center;
+
   background-color: #092036;
   color: white;
 }
@@ -111,6 +125,7 @@
     padding: 10px;
     padding: 0.5rem;
   }
+
   .button-group {
     display: flex;
     justify-content: center;
@@ -120,39 +135,36 @@
     border-radius: 12px;
     margin-bottom: 20px;
   }
-  
+
   .layout-grid {
     display: flex;
     flex-direction: column-reverse;
     gap: 10px;
   }
-  
+
   .demo-panel {
     padding: 15px;
   }
-  
+
   .controls-panel {
-    max-height: min(calc(100vh - 13rem), 30rem);
+    max-height: min(calc(100vh - 12.25rem),30rem);
     padding: 15px;
     padding-right: 11px;
   }
-  
+
   .glass-demo-group {
     flex-direction: column;
     align-items: center;
     gap: 1rem;
   }
-  
+
   .demo-stats {
     grid-template-columns: 1fr;
     text-align: center;
     color: white;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
   }
-  
-  .btn {
-    min-width: 140px;
-  }
+
 }
 
 /* Small mobile responsive styles */
@@ -160,21 +172,21 @@
   .app-container {
     padding: 5px;
   }
-  
+
   .button-group {
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .demo-panel {
     padding: 10px;
   }
-  
+
   .controls-panel {
     padding: 10px;
     padding-right: 4px;
   }
-  
+
   .glass-demo-group {
     gap: 0.5rem;
   }
@@ -186,9 +198,11 @@
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
@@ -197,6 +211,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -221,11 +236,12 @@
 ::-webkit-scrollbar {
   width: 8px;
 }
-::-webkit-scrollbar-track {
-}
+
+::-webkit-scrollbar-track {}
+
 ::-webkit-scrollbar-thumb {
   background: #f1f1f189;
   border-radius: 4px;
 }
-::-webkit-scrollbar-thumb:hover {
-}
+
+::-webkit-scrollbar-thumb:hover {}

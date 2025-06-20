@@ -129,7 +129,7 @@ function App() {
             style={`border-radius: ${radius}px; text-shadow: 1px 1px 2px rgba(255,255,255,0.5); padding: textAlign: center; fontWeight: bold;`}
           >
             <a target='_blank' href="https://www.npmjs.com/package/@specy/liquid-glass-react">
-              <h2 style={{ color: 'white', margin: 0, padding: '0.5rem', textShadow: 'rgba(0, 0, 0, 1) 1px 1px 3px' }}>
+              <h2 style={{ fontSize: '1.5rem', color: 'white', margin: 0, padding: '0.5rem', textShadow: 'rgba(0, 0, 0, 1) 1px 1px 3px' }}>
                 @specy/liquid-glass-react
               </h2>
             </a>
@@ -148,7 +148,7 @@ function App() {
                   onClick={cycleBackgroundImage}
                   className="btn btn-success"
                 >
-                  Background ({currentImageIndex + 1}/{images.length})
+                  Background {currentImageIndex + 1}/{images.length}
                 </button>
               </div>
 
