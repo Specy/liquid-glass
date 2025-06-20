@@ -310,7 +310,11 @@ function App() {
                 <FaGithub />
               </LiquidGlass>
             </a>
-            <div className='html2canvas-ignore' style={{ opacity: loading ? 1 : 0, color: 'black', fontSize: '2rem', borderRadius: '1rem', padding: '0.5rem 1rem', backdropFilter: 'blur(3px)', backgroundColor: 'rgba(255, 255, 255, 0.3)' }}>
+            <div className='html2canvas-ignore' style={{
+               position: 'absolute',  
+              top: '50%', left: '50%',
+              transform: 'translate(-50%, -50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+               opacity: loading ? 1 : 0, color: 'black', fontSize: '2rem', borderRadius: '1rem', padding: '0.5rem 1rem', backdropFilter: 'blur(3px)', backgroundColor: 'rgba(255, 255, 255, 0.3)' }}>
               Loading...
             </div>
           </div>

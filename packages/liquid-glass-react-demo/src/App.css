@@ -124,7 +124,7 @@
   .layout-grid {
     display: flex;
     flex-direction: column-reverse;
-    gap: 15px;
+    gap: 10px;
   }
   
   .demo-panel {
@@ -132,7 +132,7 @@
   }
   
   .controls-panel {
-    max-height: 45vh;
+    max-height: min(calc(100vh - 13rem), 30rem);
     padding: 15px;
     padding-right: 11px;
   }

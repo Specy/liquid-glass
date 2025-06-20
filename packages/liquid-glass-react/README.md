@@ -9,7 +9,10 @@ npm install @specy/liquid-glass-react
 ```
 
 ## Basic Usage
+
 Initialization is expensive, try to minimize re-renders and unnecessary unmouts.
+
+The component does it's best to track the position of the target element in the page and update the effect, but it cannot track the `top` or `left` etc.. position changes, if you update them, you should call the `forceUpdate` method on the ref to re-render the effect, or use the `renderKey` prop to force a re-render when needed.
 
 ```tsx
 import React, { useMemo } from 'react';
@@ -54,83 +57,79 @@ function App() {
 ## Advanced Usage with Ref
 
 ```tsx
-import React, { useRef, useMemo, useCallback } from 'react';
-import { LiquidGlass, type LiquidGlassRef } from '@specy/liquid-glass-react';
+import React, { useRef, useMemo, useCallback } from "react"
+import { LiquidGlass, type LiquidGlassRef } from "@specy/liquid-glass-react"
 
 function AdvancedExample() {
-  const glassRef = useRef<LiquidGlassRef>(null);
+	const glassRef = useRef<LiquidGlassRef>(null)
 
-  // ⚠️ IMPORTANT: Memoize all objects and callbacks
-  const glassStyle = useMemo(() => ({
-    depth: 0.8,
-    segments: 64,
-    radius: 0.3,
-    transmission: 0.95,
-    roughness: 0.05
-  }), []);
+	// ⚠️ IMPORTANT: Memoize all objects and callbacks
+	const glassStyle = useMemo(
+		() => ({
+			depth: 0.8,
+			segments: 64,
+			radius: 0.3,
+			transmission: 0.95,
+			roughness: 0.05,
+		}),
+		[]
+	)
 
-  const onReady = useCallback((instance) => {
-    console.log('LiquidGlass instance ready:', instance);
-  }, []);
+	const onReady = useCallback((instance) => {
+		console.log("LiquidGlass instance ready:", instance)
+	}, [])
 
-  const handleUpdateScreenshot = useCallback(async () => {
-    await glassRef.current?.updateScreenshot();
-  }, []);
+	const handleUpdateScreenshot = useCallback(async () => {
+		await glassRef.current?.updateScreenshot()
+	}, [])
 
-  const handleUpdateStyle = useCallback(() => {
-    glassRef.current?.updateGlassStyle({
-      depth: Math.random(),
-      transmission: 0.8 + Math.random() * 0.2
-    });
-  }, []);
+	const handleUpdateStyle = useCallback(() => {
+		glassRef.current?.updateGlassStyle({
+			depth: Math.random(),
+			transmission: 0.8 + Math.random() * 0.2,
+		})
+	}, [])
 
-  return (
-    <div>
-      <LiquidGlass
-        ref={glassRef}
-        glassStyle={glassStyle}
-        onReady={onReady}
-      >
-        <div style={{ padding: '30px' }}>
-          <h2>Interactive Glass Effect</h2>
-          <button onClick={handleUpdateScreenshot}>
-            Update Screenshot
-          </button>
-          <button onClick={handleUpdateStyle}>
-            Randomize Style
-          </button>
-        </div>
-      </LiquidGlass>
-    </div>
-  );
+	return (
+		<div>
+			<LiquidGlass ref={glassRef} glassStyle={glassStyle} onReady={onReady}>
+				<div style={{ padding: "30px" }}>
+					<h2>Interactive Glass Effect</h2>
+					<button onClick={handleUpdateScreenshot}>Update Screenshot</button>
+					<button onClick={handleUpdateStyle}>Randomize Style</button>
+				</div>
+			</LiquidGlass>
+		</div>
+	)
 }
 ```
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `style` | `string` | `''` | Custom CSS styles to apply to the glass container |
-| `wrapperStyle` | `React.CSSProperties` | `{}` | React CSS properties to apply to the wrapper div |
-| `glassStyle` | `GlassStyle` | `{}` | Glass material properties (see GlassStyle interface) |
-| `children` | `React.ReactNode` | `undefined` | Content to render inside the glass container |
-| `onReady` | `(instance: LiquidGlass) => void` | `undefined` | Callback when the liquid glass instance is ready |
-| `targetElement` | `HTMLElement` | `document.body` | The target element to capture for the glass background effect |
+| Prop            | Type                              | Default         | Description                                                         |
+| --------------- | --------------------------------- | --------------- | ------------------------------------------------------------------- |
+| `style`         | `string`                          | `''`            | Custom CSS styles to apply to the glass container                   |
+| `wrapperStyle`  | `React.CSSProperties`             | `{}`            | React CSS properties to apply to the wrapper div                    |
+| `glassStyle`    | `GlassStyle`                      | `{}`            | Glass material properties (see GlassStyle interface)                |
+| `children`      | `React.ReactNode`                 | `undefined`     | Content to render inside the glass container                        |
+| `onReady`       | `(instance: LiquidGlass) => void` | `undefined`     | Callback when the liquid glass instance is ready                    |
+| `targetElement` | `HTMLElement`                     | `document.body` | The target element to capture for the glass background effect       |
+| `renderKey`     | `string                           | number`         | Unique key to force re-render the component when changed (manually) |
 
 ## GlassStyle Interface
 
 ```tsx
 interface GlassStyle {
-  depth?: number;        // Depth of the glass effect (0-1)
-  segments?: number;     // Number of geometry segments for smoothness
-  radius?: number;       // Border radius (0-1)
-  tint?: number | null;  // Color tint (hex number or null)
-  roughness?: number;    // Surface roughness (0-1)
-  transmission?: number; // Light transmission (0-1)
-  reflectivity?: number; // Surface reflectivity (0-1)
-  ior?: number;         // Index of refraction
-  dispersion?: number;   // Chromatic dispersion effect
-  thickness?: number;   // Glass thickness
+	depth?: number // Depth of the glass effect (0-1)
+	segments?: number // Number of geometry segments for smoothness
+	radius?: number // Border radius (0-1)
+	tint?: number | null // Color tint (hex number or null)
+	roughness?: number // Surface roughness (0-1)
+	transmission?: number // Light transmission (0-1)
+	reflectivity?: number // Surface reflectivity (0-1)
+	ior?: number // Index of refraction
+	dispersion?: number // Chromatic dispersion effect
+	thickness?: number // Glass thickness
 }
 ```
 
@@ -140,13 +139,15 @@ The component exposes several methods through the ref:
 
 ```tsx
 interface LiquidGlassRef {
-  getInstance(): LiquidGlass | null;
-  updateScreenshot(): Promise<void>;
-  forceUpdate(): Promise<void>;
-  updateGlassStyle(style: Partial<GlassStyle>): void;
-  getGlassStyle(): Required<GlassStyle> | null;
-  getElement(): HTMLElement | null;
-  getContent(): HTMLDivElement | null;
+	getInstance(): LiquidGlass | null
+	updateScreenshot(): Promise<void>
+	forceUpdate(): Promise<void>
+	updateGlassStyle(style: Partial<GlassStyle>): void
+	getGlassStyle(): Required<GlassStyle> | null
+	getElement(): HTMLElement | null
+	getContent(): HTMLDivElement | null
+  forcePositionUpdate(): void
+  forceSizeUpdate(): void
 }
 ```
 

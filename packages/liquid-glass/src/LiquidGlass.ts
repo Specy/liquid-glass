@@ -85,6 +85,7 @@ export class LiquidGlass {
   private customStyle: string;
   private glassStyle: Required<GlassStyle>;
   private readonly paintCache: PaintLayerCache;
+  private firstScrollableElement: HTMLElement | null;
   private paintCacheCallback: ((canvas: HTMLCanvasElement) => void) | null = null;
 
   // ThreeJS components
@@ -99,6 +100,7 @@ export class LiquidGlass {
   // State management
   private animationId: number | null = null;
   private isInitialized: boolean = false;
+  private dimensions: Dimensions;
 
   constructor(
     targetElement: HTMLElement,
@@ -106,6 +108,7 @@ export class LiquidGlass {
     glassStyle: GlassStyle = {},
   ) {
     this.targetElement = targetElement;
+    this.firstScrollableElement = this.findFirstScrollableElement(targetElement) ?? targetElement
     this.customStyle = customStyle;
     this.paintCache = PaintLayerCache.getInstance();
 
@@ -114,6 +117,7 @@ export class LiquidGlass {
     this.floatingDiv = this.createFloatingDiv();
     this.resizeObserver = this.createResizeObserver();
 
+    this.dimensions = this.getCurrentDimensions();
     this.initialize();
   }
   // Public getters
@@ -167,11 +171,21 @@ export class LiquidGlass {
   }
 
 
+  private observerDebounceTimeout: number | null = null;
   private createResizeObserver(): ResizeObserver {
-    return new ResizeObserver(() => {
-      this.handleResize();
+    const observer = new ResizeObserver(() => {
+      if (this.observerDebounceTimeout) {
+        clearTimeout(this.observerDebounceTimeout);
+      }
+      this.observerDebounceTimeout = setTimeout(() => {
+        this.handleResize();
+        this.observerDebounceTimeout = null;
+      }, 100); // Debounce to avoid excessive calls
     });
+    observer.observe(this.targetElement);
+    return observer;
   }
+
 
   private handleResize(): void {
     if (
@@ -181,13 +195,20 @@ export class LiquidGlass {
       !this.threeCanvas
     )
       return;
-
     const { width, height } = this.getCurrentDimensions();
+
+    if (
+      this.dimensions.width === width &&
+      this.dimensions.height === height
+    ) {
+      return; // No change in dimensions, skip update
+    }
 
     this.updateRendererSize(width, height);
     this.updateCameraProjection(width, height);
     this.updateGlassGeometry(width, height);
     this.updateBackgroundPosition();
+    this.dimensions = { width, height };
   }
 
   private getCurrentDimensions(): Dimensions {
@@ -421,6 +442,10 @@ export class LiquidGlass {
       return;
 
     const floatingRect = this.floatingDiv.getBoundingClientRect();
+    const targetBounds = this.firstScrollableElement === document.documentElement ?
+      { top: -document.documentElement.scrollTop, left: -document.documentElement.scrollLeft } :
+      this.firstScrollableElement?.getBoundingClientRect()
+      ?? this.targetElement.getBoundingClientRect();
     const scrollbarSize = this.getScrollbarSizes();
 
     const floatingCenter = {
@@ -429,8 +454,8 @@ export class LiquidGlass {
     };
 
     const absolutePosition = {
-      x: floatingCenter.x + window.scrollX,
-      y: floatingCenter.y + window.scrollY,
+      x: floatingCenter.x - targetBounds.left,
+      y: floatingCenter.y - targetBounds.top
     };
 
     const canvasSize = {
@@ -440,7 +465,7 @@ export class LiquidGlass {
 
     const offset = {
       x: absolutePosition.x - canvasSize.width / 2 + scrollbarSize.x / 2,
-      y: absolutePosition.y - canvasSize.height / 2,
+      y: absolutePosition.y - canvasSize.height / 2 + scrollbarSize.y / 2,
     };
 
     this.backgroundMesh.position.set(
@@ -457,6 +482,17 @@ export class LiquidGlass {
 
   public async forceUpdate(): Promise<void> {
     await this.updateScreenshot();
+  }
+
+  public async forcePositionUpdate(): Promise<void> {
+    if (!this.isInitialized) return;
+
+    this.updateBackgroundPosition();
+  }
+
+  public async forceSizeUpdate(): Promise<void> {
+    if (!this.isInitialized) return;
+    this.handleResize();
   }
 
   public setSize(width: number, height: number): void {
@@ -517,6 +553,9 @@ export class LiquidGlass {
     this.removeEventListeners();
     this.resizeObserver.disconnect();
     this.removeDOMElements();
+    this.floatingDiv.remove();
+    this.contentElement.remove();
+    this.threeCanvas = null;
 
     this.isInitialized = false;
     console.log("LiquidGlass destroyed");
@@ -584,9 +623,26 @@ export class LiquidGlass {
     }
   }
 
+  private findFirstScrollableElement(target: HTMLElement): HTMLElement | null {
+    //checks if the elemet is scrollable, if it is then it should track the scroll
+    if (target === document.body || target === document.documentElement) {
+      return document.documentElement; // html is scrollable
+    }
+    const overflowY = window.getComputedStyle(target).overflowY;
+    if (overflowY === "auto" || overflowY === "scroll") {
+      return target; // target is scrollable
+    } else {
+      return null
+    }
+  }
+
   // Event handling
   private addEventListeners(): void {
-    window.addEventListener("scroll", this.handleScroll, { passive: true });
+    if (this.firstScrollableElement === document.body || this.firstScrollableElement === document.documentElement) {
+      window.addEventListener("scroll", this.handleScroll, { passive: true });
+    } else {
+      this.firstScrollableElement?.addEventListener("scroll", this.handleScroll, { passive: true });
+    }
     window.addEventListener("resize", this.handleWindowResize, {
       passive: true,
     });
@@ -601,7 +657,12 @@ export class LiquidGlass {
   };
 
   private removeEventListeners(): void {
-    window.removeEventListener("scroll", this.handleScroll);
+    if (this.firstScrollableElement === document.body || this.firstScrollableElement === document.documentElement) {
+      window.removeEventListener("scroll", this.handleScroll);
+    } else {
+      this.firstScrollableElement?.removeEventListener("scroll", this.handleScroll);
+    }
+
     window.removeEventListener("resize", this.handleWindowResize);
   }
 }

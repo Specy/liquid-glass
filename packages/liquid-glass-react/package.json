@@ -1,6 +1,6 @@
 {
   "name": "@specy/liquid-glass-react",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "React component for @specy/liquid-glass - A Three.js powered library to make apple's liquid with glass effect",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -44,7 +44,7 @@
     "react-dom": ">=18.0.0"
   },
   "devDependencies": {
-    "@specy/liquid-glass": "^1.11.8",
+    "@specy/liquid-glass": "^1.12.1",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "react": "^18.3.1",

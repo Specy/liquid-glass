@@ -1,6 +1,6 @@
 {
   "name": "@specy/liquid-glass",
-  "version": "1.11.8",
+  "version": "1.12.1",
   "description": "A Three.js powered library to make apple's liquid with glass effect",
   "main": "./dist/index.js",
   "module": "./dist/index.js",

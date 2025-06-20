@@ -28,6 +28,13 @@ export interface LiquidGlassProps {
      * If not provided, document.body will be used.
      */
     targetElement?: HTMLElement
+
+
+    /**
+     * Optional key to force re-rendering of the component
+     * Useful for cases where you want to reset the component state
+     */
+    renderKey?: string | number
 }
 
 export interface LiquidGlassRef {
@@ -59,6 +66,16 @@ export interface LiquidGlassRef {
      * Get the content container element
      */
     getContent: () => HTMLDivElement | null
+
+    /**
+     * Force update the position of the glass effect
+     */
+    forcePositionUpdate: () => void
+
+    /**
+     * Force update the size of the glass effect
+     */
+    forceSizeUpdate: () => void
 }
 
 export const LiquidGlass = forwardRef<LiquidGlassRef, LiquidGlassProps>(
@@ -70,6 +87,7 @@ export const LiquidGlass = forwardRef<LiquidGlassRef, LiquidGlassProps>(
             children,
             onReady,
             targetElement,
+            renderKey,
         },
         ref
     ) => {
@@ -108,7 +126,23 @@ export const LiquidGlass = forwardRef<LiquidGlassRef, LiquidGlassProps>(
             }, getContent: () => {
                 return liquidGlassRef.current ? liquidGlassRef.current.content : null
             },
+            forcePositionUpdate: () => {
+                if (liquidGlassRef.current) {
+                    liquidGlassRef.current.forcePositionUpdate()
+                }
+            } ,
+            forceSizeUpdate: () => {
+                if (liquidGlassRef.current) {
+                    liquidGlassRef.current.forceSizeUpdate()
+                }
+            }
         }))        // Initialize the LiquidGlass instance only once
+
+
+        useEffect(() => {
+            liquidGlassRef.current?.forcePositionUpdate()
+        }, [renderKey]) // Recreate instance when renderKey changes
+
         useEffect(() => {
             if (liquidGlassRef.current) return
 
