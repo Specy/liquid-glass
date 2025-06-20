@@ -62,8 +62,7 @@ function App() {
   // Background image state
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // eslint-disable-next-line 
-  const [loading, setLoading] = useState(true);
+  //const [loading, setLoading] = useState(true);
   // Glass style state
   const [segments, setSegments] = useState<number>(DEFAULT_GLASS_STYLE.segments);
   const [radius, setRadius] = useState<number>(DEFAULT_GLASS_STYLE.radius);
@@ -295,7 +294,7 @@ function App() {
                   color: 'white',
                   fontWeight: '500',
                 }}
-                onReady={() => setLoading(false)}
+                //onReady={() => setLoading(false)}
                 key={`${currentImageIndex}-top`}
                 style={`border-radius: ${radius}px; text-shadow: rgba(0, 0, 0, 1) 1px 1px 3px; padding: 0.5rem 2rem; textAlign: center; fontWeight: bold;`}
               >
