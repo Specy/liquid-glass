@@ -5,20 +5,36 @@ body {
   scroll-behavior: smooth;
 }
 
-
-
-
-/* Glassmorphism effects */
+/* Miglioramento effetto glassmorphism */
 .glass {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border-radius: 20px;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+  transition: box-shadow 0.4s, background 0.4s;
+  position: relative;
+  overflow: hidden;
 }
 
-.glass-dark {
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+.glass::after {
+  content: '';
+  position: absolute;
+  top: -40%;
+  left: -40%;
+  width: 180%;
+  height: 180%;
+  background: radial-gradient(circle at 60% 40%, rgba(255,255,255,0.18) 0%, transparent 70%);
+  opacity: 0.7;
+  pointer-events: none;
+  animation: glass-reflect 6s linear infinite;
+}
+
+@keyframes glass-reflect {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.7; }
+  50% { transform: rotate(8deg) scale(1.05); opacity: 1; }
+  100% { transform: rotate(0deg) scale(1); opacity: 0.7; }
 }
 
 /* Portfolio hover effects */
