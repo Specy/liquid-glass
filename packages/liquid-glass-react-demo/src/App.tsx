@@ -1,19 +1,19 @@
 import { useState, useMemo, useCallback } from 'react'
 import './App.css'
 import { LiquidGlass } from '@specy/liquid-glass-react'
-import { FaGithub } from 'react-icons/fa'
+import { FaGithub, FaMusic } from 'react-icons/fa'
 // Default values based on the core library
 const DEFAULT_GLASS_STYLE = {
   depth: 20,
   segments: 86,
   radius: 20,
-  tint: 0xd99b87 as number | null,
-  roughness: 0,
+  tint: 0xdddddd as number | null,
+  roughness: 0.2,
   transmission: 1,
   reflectivity: 0.9,
   ior: 2,
   thickness: 50,
-  dispersion: 10,
+  dispersion: 5,
 } as const;
 
 interface SliderProps {
@@ -28,7 +28,7 @@ interface SliderProps {
 
 const images = [
   '/1.jpg',
-  '/2.jpg',
+  '/0.webp',
   '/3.jpg',
 ]
 
@@ -126,8 +126,9 @@ function App() {
             glassStyle={glassStyle}
             wrapperStyle={{
               color: 'white',
+              maxWidth: '30rem',
             }}
-            style={`border-radius: ${radius}px; text-shadow: 1px 1px 2px rgba(255,255,255,0.5); padding: textAlign: center; fontWeight: bold;`}
+            style={`border-radius: ${radius}px; text-shadow: 1px 1px 2px rgba(255,255,255,0.5); padding: fontWeight: bold;`}
           >
             <a target='_blank' href="https://www.npmjs.com/package/@specy/liquid-glass-react">
               <h2 style={{ fontSize: '1.2rem', color: 'white', margin: 0, padding: '0.5rem', textShadow: 'rgba(0, 0, 0, 1) 1px 1px 3px' }}>
@@ -287,35 +288,58 @@ function App() {
 
           {/* Glass Demo Panel */}
           <div className="demo-panel">
-            <a className="glass-demo-group" target="_blank" href='https://github.com/specy/liquid-glass'>
+            <a style={{display: 'flex', alignItems: 'end'}}  className="glass-demo-group" target="_blank" href='https://github.com/specy/liquid-glass'>
               <LiquidGlass
                 glassStyle={glassStyle}
                 wrapperStyle={{
                   color: 'white',
-                  fontWeight: '500',
+
                 }}
                 //onReady={() => setLoading(false)}
                 key={`${currentImageIndex}-top`}
-                style={`border-radius: ${radius}px; text-shadow: rgba(0, 0, 0, 1) 1px 1px 3px; padding: 0.5rem 2rem; textAlign: center; fontWeight: bold;`}
+                style={`aspect-ratio: 1; border-radius: ${radius}px; text-shadow: rgba(0, 0, 0, 1) 1px 1px 3px; padding: 0.8rem;`}
               >
-                Star me on Github!
+                <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', aspectRatio: 1 }}>
+                  <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'space-between' }}>
+                    <img src='/album.jpg' style={{ width: '60px', height: '60px', borderRadius: '0.4rem' }} alt="Album Cover" />
+                    <FaMusic style={{ 
+                      filter: 'drop-shadow( 1px 1px 2px rgba(0, 0, 0, .7))',
+                      fontSize: '1.4rem' }} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <div>
+                      Today's Hits
+                    </div>
+                    <div style={{ fontSize: '0.8rem', opacity: 0.9 }}>
+                      Borderline
+                    </div>
+                  </div>
+
+                  <button style={{ textShadow: 'rgba(0, 0, 0, 1) 1px 1px 3px', padding: '0.25rem 1rem', borderRadius: '1rem', backgroundColor: 'rgba(255, 255, 255, 0.3)' }}>
+                    Star on github
+                  </button>
+                </div>
               </LiquidGlass>
               <LiquidGlass
                 glassStyle={glassStyle}
                 wrapperStyle={{
-                  color: 'black',
+                  color: 'white',
                 }}
                 key={`${currentImageIndex}-heart`}
                 style={`border-radius: ${radius}px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); padding: 0.5rem; textAlign: center; fontWeight: bold; height: 1.5rem; width: 1.5rem; font-size: 1.3rem`}
               >
-                <FaGithub />
+                <FaGithub style={{
+                  filter: 'drop-shadow( 1px 1px 2px rgba(0, 0, 0, .7))',
+                }}/>
               </LiquidGlass>
+
             </a>
+
           </div>
         </div>
 
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }
 
