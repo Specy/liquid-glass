@@ -146,7 +146,7 @@
   }
 
   .controls-panel {
-    max-height: min(calc(100vh - 12.25rem),30rem);
+    max-height: min(calc(100vh - 17.25rem),30rem);
     padding: 15px;
     padding-right: 11px;
   }
